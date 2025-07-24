@@ -26,7 +26,7 @@ class LibraryDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         library = self.get_object()
-        context['books'] = Book.objects.filter(library_book=library)  # uses related_name
+        context['books'] = Book.objects.filter(library_book = library)  # uses related_name
         return context
 
 def register(request):
