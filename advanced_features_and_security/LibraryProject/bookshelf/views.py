@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import permission_required
 from .models import Book # Replace with Book if you renamed it
-from .forms import SearchForm  # ✅ import the form, not 'query'
+from .forms import ExampleForm # ✅ import the form, not 'query'
 # Create your views here.
 
 # Only users with 'can_view' permission can access this view
@@ -14,21 +14,21 @@ def book_list(request):
 # views.py
 
 def search_view(request):
-    form = SearchForm(request.GET)
+    form = ExampleForm(request.GET)
     if form.is_valid():
         query = form.cleaned_data['q']
         results = Book.objects.filter(title__icontains=query)
     else:
         results = Book.objects.none()
-    return render(request, 'search_results.html', {'results': results})
+    return render(request, 'example_results.html', {'results': results})
 
 # views.py
 from django.shortcuts import render
-from .forms import SearchForm
+from .forms import ExampleForm
 from .models import Book  # assuming you have a Book model
 
-def search_books(request):
-    form = SearchForm(request.GET or None)
+def example_books(request):
+    form = ExampleForm(request.GET or None)
     results = []
     if form.is_valid():
         query = form.cleaned_data['q']
