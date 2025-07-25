@@ -146,9 +146,9 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_SSL_REDIRECT = True
 
 # Optional: HTTP Strict Transport Security (HSTS)
-SECURE_HSTS_SECONDS = 60 
-SECURE_HSTS_INCLUDE_SUBDOMAINS = False
-SECURE_HSTS_PRELOAD = False
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
 
 CSP_DEFAULT_SRC = ("'self'",)  # only allow content from your own domain
 CSP_SCRIPT_SRC = ("'self'", 'ajax.googleapis.com')  # allow scripts from your domain and Google APIs
