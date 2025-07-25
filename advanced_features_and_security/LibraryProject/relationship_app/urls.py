@@ -1,7 +1,6 @@
 from django.urls import path
 from django.contrib.auth.views import LoginView, LogoutView
 from . import views
-from .views import user_permissions_view
 from .views import list_books, LibraryDetailView, BookCreateView, BookUpdateView, BookDeleteView  # SignUpView from your code
 from .views import admin_view, librarian_view, member_view
 urlpatterns = [
@@ -22,4 +21,5 @@ urlpatterns = [
     path('edit_book/<int:pk>/edit/', BookUpdateView.as_view(), name='book_edit'),
     path('delete_book/<int:pk>/delete/', BookDeleteView.as_view(), name='book_delete'),
 ]
+
 

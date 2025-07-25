@@ -6,8 +6,10 @@ from django.contrib.auth.forms import UserCreationForm
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import user_passes_test, login_required,permission_required
-from django.http import HttpResponse
 from django.utils.decorators import method_decorator
+from .models import UserProfile
+
+
 
 
 # Create your views here.
@@ -26,14 +28,15 @@ class LibraryDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         library = self.get_object()
-        context['books'] = Book.objects.filter(library_book = library)  # uses related_name
-        return context
+        context['books'] = library.books.all()  # via the ManyToManyField
+
 
 def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            UserProfile.objects.create(user=user)
             login(request, user)
             return redirect('list_books')  # or wherever you want to redirect
     else:
@@ -42,14 +45,14 @@ def register(request):
     return render(request, 'relationship_app/register.html', {'form': form})
 
 # Helper functions
-def is_admin(CustomUser):
-    return CustomUser.is_authenticated and hasattr(CustomUser, 'userprofile') and CustomUser.userprofile.role == 'Admin'
+def is_admin(User):
+    return User.is_authenticated and hasattr(User, 'userprofile') and User.userprofile.role == 'Admin'
 
-def is_librarian(CustomUser):
-    return CustomUser.is_authenticated and hasattr(CustomUser, 'userprofile') and CustomUser.userprofile.role == 'Librarian'
+def is_librarian(User):
+    return User.is_authenticated and hasattr(User, 'userprofile') and User.userprofile.role == 'Librarian'
 
-def is_member(CustomUser):
-    return CustomUser.is_authenticated and hasattr(CustomUser, 'userprofile') and CustomUser.userprofile.role == 'Member'
+def is_member(User):
+    return User.is_authenticated and hasattr(User, 'userprofile') and User.userprofile.role == 'Member'
 
 
 @user_passes_test(is_admin)
@@ -64,9 +67,11 @@ def librarian_view(request):
 def member_view(request):
     return render(request, 'relationship_app/member_view.html')
 
-@permission_required('relationship_app.can_view_permissions', raise_exception=True)
-def user_permissions_view(request):
-    return HttpResponse("User has permission to view this page.")
+class Meta:
+    permissions = [
+        ('can_view_permissions', 'Can view permissions'),
+    ]
+
 
 
 @method_decorator(permission_required('relationship_app.add_book', raise_exception=True), name='dispatch')
@@ -88,6 +93,7 @@ class BookDeleteView(DeleteView):
     model = Book
     template_name = 'relationship_app/book_confirm_delete.html'
     success_url = reverse_lazy('list_books')
+
 
 
 
