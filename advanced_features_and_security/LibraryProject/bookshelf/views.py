@@ -8,7 +8,7 @@ from .forms import ExampleForm # ✅ import the form, not 'query'
 @permission_required('bookshelf.can_view', raise_exception=True)
 def book_list(request):
     books = Book.objects.all()  
-    return render(request, 'bookshelf/list_books.html', {'books': books})
+    return render(request, 'bookshelf/book_list.html', {'books': books})
 
 
 # views.py
@@ -20,7 +20,7 @@ def search_view(request):
         results = Book.objects.filter(title__icontains=query)
     else:
         results = Book.objects.none()
-    return render(request, 'example_results.html', {'results': results})
+    return render(request, 'form_example.html', {'results': results})
 
 # views.py
 from django.shortcuts import render
@@ -33,4 +33,4 @@ def example_books(request):
     if form.is_valid():
         query = form.cleaned_data['q']
         results = Book.objects.filter(title__icontains=query) if query else Book.objects.all()
-    return render(request, 'search_books.html', {'form': form, 'results': results})
+    return render(request, 'form_example.html', {'form': form, 'results': results})
