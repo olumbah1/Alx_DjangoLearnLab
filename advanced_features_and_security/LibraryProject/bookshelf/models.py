@@ -10,7 +10,7 @@ class Book(models.Model):
         return f"{self.title} by {self.author}"
     
 class CustomUser(AbstractUser):
-        date_to_birth = models.DateField(null = True, blank = True)
+        date_of_birth = models.DateField(null = True, blank = True)
         profile_photo = models.ImageField(upload_to = "profile_img", blank = True, null = True)
     
         def __str__(self):
