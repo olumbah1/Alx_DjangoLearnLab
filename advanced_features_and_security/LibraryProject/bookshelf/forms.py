@@ -1,7 +1,7 @@
 # forms.py
 from django import forms
 
-class SearchForm(forms.Form):
+class ExampleForm(forms.Form):
     q = forms.CharField(
         label='Search Books',
         max_length=100,
