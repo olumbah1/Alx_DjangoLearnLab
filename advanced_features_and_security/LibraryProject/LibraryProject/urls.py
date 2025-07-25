@@ -21,6 +21,7 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('relationship_app/', include('relationship_app.urls')),
-    path('', lambda request: redirect('relationship_app:list_books')),  # redirect root to your books list
+    path('', lambda request: redirect('relationship_app:list_books')),# redirect root to your books list 
+    path('', include('bookshelf.urls')),
 ]
     

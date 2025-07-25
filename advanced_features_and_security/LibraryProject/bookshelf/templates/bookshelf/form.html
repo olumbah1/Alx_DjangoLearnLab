@@ -1,0 +1,5 @@
+<form method="get" action="">
+     {% csrf_token %}
+    {{ form.q.label_tag }} {{ form.q }}
+    <input type="submit" value="Search">
+</form>
