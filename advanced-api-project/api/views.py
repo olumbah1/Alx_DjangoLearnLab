@@ -1,9 +1,8 @@
-
 from rest_framework import generics
 from rest_framework.response import Response
 from .models import Book, Author
 from .serializers import BookSerializer
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
 
 # Create your views here.
@@ -12,14 +11,14 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 class BookListView(generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [AllowAny]  # Anyone can read
+    permission_classes = [IsAuthenticatedOrReadOnly]  # Anyone can read
 
 
 # DetailView – Retrieve single book by ID (public access)
 class BookDetailView(generics.RetrieveAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
 
 # CreateView – Add a new book (only authenticated users)
