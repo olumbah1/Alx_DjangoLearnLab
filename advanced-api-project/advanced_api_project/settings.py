@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'api',
     'django_filters',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -130,4 +131,9 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ],
+   
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',  # or TokenAuthentication
+        'rest_framework.authentication.SessionAuthentication',
+    ),
 }

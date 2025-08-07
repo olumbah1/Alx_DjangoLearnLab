@@ -8,10 +8,10 @@ from .models import Book, Author
 
 class BookAPITestCase(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='testpass')
+        self.user = User.objects.create_user(username='Olumbah', password='Olu')
         self.author = Author.objects.create(name='Test Author')  # removed user=...
         self.client = APIClient()
-        self.client.login(username='testuser', password='testpass')
+        self.client.login(username='Olumbah', password='Olu')
         self.book = Book.objects.create(
             
            title='Test Book',
@@ -23,6 +23,8 @@ class BookAPITestCase(APITestCase):
         self.book_list_url = reverse('book-list')    # Adjust based on your urls.py name
         self.book_detail_url = reverse('book-detail', kwargs={'pk': self.book.pk})
         self.book_create_url = reverse('book-create')
+        self.book_delete_url = reverse('book-delete', kwargs={'pk': self.book.pk})
+        self.book_update_url = reverse('book-update', kwargs={'pk': self.book.pk})
 
     def test_list_books(self):
         response = self.client.get(self.book_list_url)
@@ -31,9 +33,10 @@ class BookAPITestCase(APITestCase):
 
     def test_create_book(self):
         data = {
-            'title': 'New Book',
-            'publication_year': 2022
-        }
+        'title': 'New Book',
+        'publication_year': 2022,
+        'author': self.author.id  # Fix
+    }
         response = self.client.post(self.book_create_url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Book.objects.count(), 2)
@@ -41,17 +44,19 @@ class BookAPITestCase(APITestCase):
     def test_update_book(self):
         data = {
             'title': 'Updated Book',
-            'publication_year': 2024
+            'publication_year': 2024,
+            'author': self.author.id
         }
-        response = self.client.put(self.book_detail_url, data)
+        response = self.client.put(reverse('book-update', kwargs={'pk': self.book.pk}), data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.book.refresh_from_db()
         self.assertEqual(self.book.title, 'Updated Book')
 
     def test_delete_book(self):
-        response = self.client.delete(self.book_detail_url)
+        response = self.client.delete(reverse('book-delete', kwargs={'pk': self.book.pk}))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Book.objects.count(), 0)
+
 
     def test_unauthenticated_create(self):
         self.client.logout()  # Remove authentication

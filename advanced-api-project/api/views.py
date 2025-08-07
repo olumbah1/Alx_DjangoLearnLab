@@ -14,7 +14,7 @@ class BookListView(generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]  # Anyone can read
-    filter_backend = [DjangoFilterBackend,
+    filter_backends = [DjangoFilterBackend,
                       filters.SearchFilter,
                       filters.OrderingFilter]
     filter_fields = ['title', 'author', 'publication_year']
@@ -35,7 +35,7 @@ class BookCreateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]  # Only logged-in users
 
     def perform_create(self, serializer):
-        author = Author.objects.get(user=self.request.user)  # Get linked Author
+        author = Author.objects.first()
         serializer.save(author=author)  # Assign logged-in author to book
 
 
@@ -46,7 +46,7 @@ class BookUpdateView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_update(self, serializer):
-        author = Author.objects.get(user=self.request.user)
+        author = Author.objects.first()
         serializer.save(author=author)
 
 
