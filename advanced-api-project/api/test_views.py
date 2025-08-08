@@ -8,10 +8,10 @@ from .models import Book, Author
 
 class BookAPITestCase(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='Olumbah', password='Olu')
-        self.author = Author.objects.create(name='Test Author')  # removed user=...
+        self.user = User.objects.create_user(username='testuser', password='testpass')
+        self.author = Author.objects.create(user=self.user, name='Test Author')
         self.client = APIClient()
-        self.client.login(username='Olumbah', password='Olu')
+        self.client.login(username='testuser', password='testpass')
         self.book = Book.objects.create(
             
            title='Test Book',

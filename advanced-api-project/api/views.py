@@ -4,6 +4,7 @@ from .models import Book, Author
 from .serializers import BookSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
+from django.contrib.auth.models import User
 
 
 
@@ -35,7 +36,7 @@ class BookCreateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]  # Only logged-in users
 
     def perform_create(self, serializer):
-        author = Author.objects.first()
+        author = Author.objects.get(user=self.request.user)
         serializer.save(author=author)  # Assign logged-in author to book
 
 
@@ -46,7 +47,7 @@ class BookUpdateView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_update(self, serializer):
-        author = Author.objects.first()
+        author = Author.objects.get(user=self.request.user)
         serializer.save(author=author)
 
 
