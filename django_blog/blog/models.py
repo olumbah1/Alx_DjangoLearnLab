@@ -7,5 +7,17 @@ class Post(models.Model):
     content = models.TextField()
     published_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
+    def __str__(self):
+        return self.title
+        
+    
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE) # If a user is deleted, their profile is deleted too.
+    bio = models.TextField(blank=True)
+    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True) #Extra info you can store beyond what the default User model provides.
+    
+    def __str__(self):
+        return f"{self.user.username} Profile"
+    
     
     
