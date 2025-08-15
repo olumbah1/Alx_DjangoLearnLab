@@ -20,7 +20,7 @@ class ProfileUpdateForm(forms.ModelForm): #Lets users change bio and profile pic
          model = Profile
          fields = ['bio', 'profile_picture'] #These forms make sure only allowed fields are updated and also handle form validation automatically.
 
-class CommentCreateForm(forms.ModelForm):
+class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ['content']

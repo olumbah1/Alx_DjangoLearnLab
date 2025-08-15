@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .forms import  UserRegisterForm, UserUpdateForm, ProfileUpdateForm, CommentCreateForm, CommentUpdateForm
+from .forms import  UserRegisterForm, UserUpdateForm, ProfileUpdateForm, CommentForm, CommentUpdateForm
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Post, Comment
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -78,7 +78,7 @@ class PostDetailView(DetailView):
         # Get all comments for this post, ordered by newest first
         context['comments'] = Comment.objects.filter(post=self.object).order_by('-created_at') #Adds a list of all comments related to this post, ordered newest first.
         if self.request.user.is_authenticated: # This allows the user to submit a comment from the post detail page.
-            context['comment_form'] = CommentCreateForm() # empty form for posting new comment
+            context['comment_form'] = CommentForm() # empty form for posting new comment
         return context # Returns the updated context dictionary to be used by the template.
   
         
@@ -128,7 +128,7 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class CommentCreateView(LoginRequiredMixin, CreateView):
     def post(self, request, pk):
         post = Post.objects.get(pk=pk)
-        form = CommentCreateForm(request.POST)
+        form = CommentForm(request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
             comment.author = request.user
