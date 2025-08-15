@@ -1,16 +1,45 @@
-{% extends 'base.html' %}
+{% extends 'blog/base.html' %}
+{% csrf_token %}
+{% block title %}Django Blog - Home{% endblock %}
 
 {% block content %}
-<h1>All Posts</h1>
-<a href="{% url 'post-create' %}">➕ Create New Post</a>
-<ul>
-    {% for post in posts %}
-        <li>
-            <a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a>
-            <small>by {{ post.author }}</small>
-        </li>
-    {% empty %}
-        <li>No posts yet.</li>
-    {% endfor %}
-</ul>
-{% endblock %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <h1>Latest Blog Posts</h1>
+    
+    {% if posts %}
+        {% for post in posts %}
+            <article style="background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h2><a href="{% url 'post-detail' post.pk %}" style="color: #007bff; text-decoration: none;">{{ post.title }}</a></h2>
+                <p style="color: #666; font-size: 14px;">
+                    By {{ post.author.username }} on {{ post.date_posted|date:"F d, Y" }}
+                </p>
+                <p>{{ post.content|truncatewords:50 }}</p>
+                <a href="{% url 'post-detail' post.pk %}" style="color: #007bff;">Read more...</a>
+            </article>
+        {% endfor %}
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+            <nav aria-label="Page navigation">
+                <ul style="display: flex; justify-content: center; list-style: none; padding: 0;">
+                    {% if page_obj.has_previous %}
+                        <li><a href="?page=1" style="padding: 8px 12px; margin: 0 2px; border: 1px solid #ddd; text-decoration: none;">First</a></li>
+                        <li><a href="?page={{ page_obj.previous_page_number }}" style="padding: 8px 12px; margin: 0 2px; border: 1px solid #ddd; text-decoration: none;">Previous</a></li>
+                    {% endif %}
+                    
+                    <li style="padding: 8px 12px; margin: 0 2px; border: 1px solid #007bff; background-color: #007bff; color: white;">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </li>
+                    
+                    {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}" style="padding: 8px 12px; margin: 0 2px; border: 1px solid #ddd; text-decoration: none;">Next</a></li>
+                        <li><a href="?page={{ page_obj.paginator.num_pages }}" style="padding: 8px 12px; margin: 0 2px; border: 1px solid #ddd; text-decoration: none;">Last</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <p>No posts available yet. <a href="{% url 'post-create' %}">Create the first post!</a></p>
+    {% endif %}
+</div>
+{% endblock %}}

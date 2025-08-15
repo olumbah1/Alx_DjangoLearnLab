@@ -1,0 +1,8 @@
+{% extends "blog/base.html" %}
+{# Template for editing a comment #}
+<h2>Edit Comment</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}  {# Renders the form with existing comment data #}
+    <button type="submit">Update</button>
+</form>

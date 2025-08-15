@@ -1,0 +1,29 @@
+{% extends "blog/base.html" %}
+<h2>Comments</h2>
+
+{# Display all comments for the post #}
+{% for comment in post.comments.all %}
+    <div>
+        <p><strong>{{ comment.author }}</strong>: {{ comment.content }}</p>
+        
+        {# Show edit/delete links only if the logged-in user is the comment's author #}
+        {% if comment.author == user %}
+            <a href="{% url 'comment-update' comment.pk %}">Edit</a>
+            <a href="{% url 'comment-delete' comment.pk %}">Delete</a>
+        {% endif %}
+    </div>
+{% empty %}
+    <p>No comments yet.</p>
+{% endfor %}
+
+{# Form to add a new comment #}
+{% if user.is_authenticated %}
+    <h3>Leave a Comment:</h3>
+    <form method="post" action="{% url 'comment-create' post.pk %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Post Comment</button>
+    </form>
+{% else %}
+    <p><a href="{% url 'login' %}">Log in</a> to leave a comment.</p>
+{% endif %}

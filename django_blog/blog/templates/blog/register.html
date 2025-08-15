@@ -1,5 +1,74 @@
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Register</button>
-</form>
+{% extends 'blog/base.html' %}
+
+{% block title %}Register - Django Blog{% endblock %}
+{% csrf_token %}
+{% block content %}
+<div style="max-width: 400px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    <h2 style="text-align: center; color: #333; margin-bottom: 30px;">Create Account</h2>
+    
+    {% if form.errors %}
+        <div style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin-bottom: 20px;">
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 20px;">
+            <label for="{{ form.username.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">Username:</label>
+            {{ form.username }}
+            {% if form.username.help_text %}
+                <small style="color: #666;">{{ form.username.help_text }}</small>
+            {% endif %}
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="{{ form.password1.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">Password:</label>
+            {{ form.password1 }}
+            {% if form.password1.help_text %}
+                <small style="color: #666;">{{ form.password1.help_text }}</small>
+            {% endif %}
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="{{ form.password2.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">Confirm Password:</label>
+            {{ form.password2 }}
+            {% if form.password2.help_text %}
+                <small style="color: #666;">{{ form.password2.help_text }}</small>
+            {% endif %}
+        </div>
+        
+        <button type="submit" style="width: 100%; background-color: #28a745; color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-bottom: 20px;">
+            Create Account
+        </button>
+        
+        <div style="text-align: center;">
+            <p>Already have an account? <a href="{% url 'login' %}" style="color: #007bff; text-decoration: none;">Login here</a></p>
+        </div>
+    </form>
+</div>
+
+<style>
+    input[type="text"], input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+    input[type="text"]:focus, input[type="password"]:focus {
+        outline: none;
+        border-color: #28a745;
+    }
+    small {
+        display: block;
+        margin-top: 5px;
+    }
+</style>
+{% endblock %}
