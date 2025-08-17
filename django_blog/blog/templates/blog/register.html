@@ -1,16 +1,24 @@
 {% extends 'blog/base.html' %}
 
 {% block title %}Register - Django Blog{% endblock %}
-{% csrf_token %}
+
 {% block content %}
 <div style="max-width: 400px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
     <h2 style="text-align: center; color: #333; margin-bottom: 30px;">Create Account</h2>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background-color: {% if message.tags == 'success' %}#d4edda; color: #155724;{% else %}#f8d7da; color: #721c24;{% endif %} padding: 10px; border-radius: 4px; margin-bottom: 20px;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
     
     {% if form.errors %}
         <div style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin-bottom: 20px;">
             {% for field, errors in form.errors.items %}
                 {% for error in errors %}
-                    <p>{{ error }}</p>
+                    <p><strong>{{ field|title }}:</strong> {{ error }}</p>
                 {% endfor %}
             {% endfor %}
         </div>
@@ -23,15 +31,20 @@
             <label for="{{ form.username.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">Username:</label>
             {{ form.username }}
             {% if form.username.help_text %}
-                <small style="color: #666;">{{ form.username.help_text }}</small>
+                <small style="display: block; margin-top: 5px; color: #666;">{{ form.username.help_text }}</small>
             {% endif %}
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="{{ form.email.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">Email:</label>
+            {{ form.email }}
         </div>
         
         <div style="margin-bottom: 20px;">
             <label for="{{ form.password1.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">Password:</label>
             {{ form.password1 }}
             {% if form.password1.help_text %}
-                <small style="color: #666;">{{ form.password1.help_text }}</small>
+                <small style="display: block; margin-top: 5px; color: #666;">{{ form.password1.help_text }}</small>
             {% endif %}
         </div>
         
@@ -39,11 +52,11 @@
             <label for="{{ form.password2.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">Confirm Password:</label>
             {{ form.password2 }}
             {% if form.password2.help_text %}
-                <small style="color: #666;">{{ form.password2.help_text }}</small>
+                <small style="display: block; margin-top: 5px; color: #666;">{{ form.password2.help_text }}</small>
             {% endif %}
         </div>
         
-        <button type="submit" style="width: 100%; background-color: #28a745; color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-bottom: 20px;">
+        <button type="submit" style="width: 100%; background-color: #007bff; color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-bottom: 20px; transition: background-color 0.3s;">
             Create Account
         </button>
         
@@ -54,21 +67,37 @@
 </div>
 
 <style>
-    input[type="text"], input[type="password"] {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 16px;
-        box-sizing: border-box;
+    /* Style Django form fields */
+    input[type="text"], 
+    input[type="email"], 
+    input[type="password"],
+    #id_username,
+    #id_email,
+    #id_password1,
+    #id_password2 {
+        width: 100% !important;
+        padding: 10px !important;
+        border: 1px solid #ddd !important;
+        border-radius: 4px !important;
+        font-size: 16px !important;
+        box-sizing: border-box !important;
     }
-    input[type="text"]:focus, input[type="password"]:focus {
-        outline: none;
-        border-color: #28a745;
+    
+    input[type="text"]:focus, 
+    input[type="email"]:focus, 
+    input[type="password"]:focus {
+        outline: none !important;
+        border-color: #007bff !important;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25) !important;
     }
+    
+    button:hover {
+        background-color: #0056b3 !important;
+    }
+    
     small {
-        display: block;
-        margin-top: 5px;
+        font-size: 12px;
+        line-height: 1.4;
     }
 </style>
 {% endblock %}

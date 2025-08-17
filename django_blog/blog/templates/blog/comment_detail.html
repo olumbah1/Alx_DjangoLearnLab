@@ -1,29 +1,121 @@
-{% extends "blog/base.html" %}
-<h2>Comments</h2>
+{% extends 'blog/base.html' %}
 
-{# Display all comments for the post #}
-{% for comment in post.comments.all %}
-    <div>
-        <p><strong>{{ comment.author }}</strong>: {{ comment.content }}</p>
+{% block title %}{{ post.title }} - Django Blog{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <!-- Post Content -->
+    <article style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px;">
+        <header style="margin-bottom: 20px;">
+            <h1 style="color: #333; margin-bottom: 10px;">{{ post.title }}</h1>
+            <div style="color: #666; font-size: 14px; margin-bottom: 15px;">
+                By <strong>{{ post.author.username }}</strong> on {{ post.date_posted|date:"F d, Y - g:i A" }}
+                {% if post.updated_date and post.updated_date != post.date_posted %}
+                    • Updated {{ post.updated_date|date:"F d, Y - g:i A" }}
+                {% endif %}
+            </div>
+            
+            {% if user == post.author or user.is_staff %}
+                <div style="margin-top: 15px;">
+                    <a href="{% url 'post-update' post.pk %}" 
+                       style="background-color: #28a745; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; margin-right: 10px; font-size: 14px; transition: background-color 0.3s;"
+                       onmouseover="this.style.backgroundColor='#218838'"
+                       onmouseout="this.style.backgroundColor='#28a745'">
+                        Edit Post
+                    </a>
+                    <a href="{% url 'post-delete' post.pk %}" 
+                       style="background-color: #dc3545; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; font-size: 14px; transition: background-color 0.3s;"
+                       onmouseover="this.style.backgroundColor='#c82333'"
+                       onmouseout="this.style.backgroundColor='#dc3545'">
+                        Delete Post
+                    </a>
+                </div>
+            {% endif %}
+        </header>
         
-        {# Show edit/delete links only if the logged-in user is the comment's author #}
-        {% if comment.author == user %}
-            <a href="{% url 'comment-update' comment.pk %}">Edit</a>
-            <a href="{% url 'comment-delete' comment.pk %}">Delete</a>
+        <div style="color: #333; line-height: 1.8; font-size: 16px;">
+            {{ post.content|linebreaks }}
+        </div>
+    </article>
+
+    <!-- Comments Section -->
+    <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid #f8f9fa; padding-bottom: 15px;">
+            <h3 style="color: #333; margin: 0;">
+                Comments ({{ comments.count }})
+            </h3>
+            {% if user.is_authenticated %}
+                <a href="{% url 'comment-create' post.pk %}" 
+                   style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; transition: background-color 0.3s;"
+                   onmouseover="this.style.backgroundColor='#0056b3'"
+                   onmouseout="this.style.backgroundColor='#007bff'">
+                    Add Comment
+                </a>
+            {% endif %}
+        </div>
+
+        {% if comments %}
+            {% for comment in comments %}
+                <div style="border-bottom: 1px solid #eee; padding: 20px 0; {% if not forloop.last %}margin-bottom: 0;{% endif %}">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <div>
+                            <strong style="color: #333;">{{ comment.author.username }}</strong>
+                            <span style="color: #666; font-size: 14px; margin-left: 10px;">
+                                {{ comment.created_date|date:"F d, Y - g:i A" }}
+                            </span>
+                            {% if comment.updated_date and comment.updated_date != comment.created_date %}
+                                <span style="color: #888; font-size: 12px; font-style: italic; margin-left: 10px;">
+                                    (edited)
+                                </span>
+                            {% endif %}
+                        </div>
+                        
+                        {% if user == comment.author or user.is_staff %}
+                            <div style="display: flex; gap: 8px;">
+                                <a href="{% url 'comment-update' comment.pk %}" 
+                                   style="color: #28a745; text-decoration: none; font-size: 12px; padding: 4px 8px; border: 1px solid #28a745; border-radius: 3px; transition: all 0.3s;"
+                                   onmouseover="this.style.backgroundColor='#28a745'; this.style.color='white';"
+                                   onmouseout="this.style.backgroundColor='transparent'; this.style.color='#28a745';">
+                                    Edit
+                                </a>
+                                <a href="{% url 'comment-delete' comment.pk %}" 
+                                   style="color: #dc3545; text-decoration: none; font-size: 12px; padding: 4px 8px; border: 1px solid #dc3545; border-radius: 3px; transition: all 0.3s;"
+                                   onmouseover="this.style.backgroundColor='#dc3545'; this.style.color='white';"
+                                   onmouseout="this.style.backgroundColor='transparent'; this.style.color='#dc3545';">
+                                    Delete
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div style="color: #333; line-height: 1.6;">
+                        {{ comment.content|linebreaks }}
+                    </div>
+                </div>
+            {% endfor %}
+            
+            {% if comments.count > 5 %}
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="{% url 'comment-list' post.pk %}" 
+                       style="color: #007bff; text-decoration: none; font-weight: bold;">
+                        View All Comments ({{ comments.count }}) →
+                    </a>
+                </div>
+            {% endif %}
+        {% else %}
+            <div style="text-align: center; padding: 40px 20px; color: #666;">
+                <p style="margin-bottom: 15px;">No comments yet. Be the first to share your thoughts!</p>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'comment-create' post.pk %}" 
+                       style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
+                        Add First Comment
+                    </a>
+                {% else %}
+                    <p><a href="{% url 'login' %}" style="color: #007bff;">Login</a> to add a comment.</p>
+                {% endif %}
+            </div>
         {% endif %}
     </div>
-{% empty %}
-    <p>No comments yet.</p>
-{% endfor %}
-
-{# Form to add a new comment #}
-{% if user.is_authenticated %}
-    <h3>Leave a Comment:</h3>
-    <form method="post" action="{% url 'comment-create' post.pk %}">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Post Comment</button>
-    </form>
-{% else %}
-    <p><a href="{% url 'login' %}">Log in</a> to leave a comment.</p>
-{% endif %}
+    
+    <!-- Navigation -->
+    <div style="text-align: center; margin: 30px 0;">

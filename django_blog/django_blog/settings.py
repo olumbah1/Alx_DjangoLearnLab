@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'blog',
     'pymysql',
+    'taggit',
 ]
 
 MIDDLEWARE = [
@@ -136,3 +137,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = 'post-list'  # Where to go after login
 LOGOUT_REDIRECT_URL = 'post-list'  # Where to go after logout
 LOGIN_URL = 'login'  # Where to go when login is required
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

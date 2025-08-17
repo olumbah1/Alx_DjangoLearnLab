@@ -1,8 +1,71 @@
-{% extends "blog/base.html" %}
-{# Template for confirming comment deletion #}
-<h2>Are you sure you want to delete this comment?</h2>
-<form method="post">
-    {% csrf_token %}
-    <button type="submit">Yes, delete</button>
-    <a href="{% url 'post-detail' comment.post.pk %}">Cancel</a>  {# Link back to the post detail page #}
-</form>
+{% extends 'blog/base.html' %}
+
+{% block title %}Delete Comment - Django Blog{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 0 auto;">
+    <!-- Post Info -->
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+        <h3 style="margin: 0 0 10px 0;">Comment on:</h3>
+        <h4 style="margin: 0 0 10px 0;"><a href="{% url 'post-detail' comment.post.pk %}" style="color: #007bff; text-decoration: none;">{{ comment.post.title }}</a></h4>
+        <p style="margin: 0; color: #666; font-size: 14px;">Posted on {{ comment.created_date|date:"F d, Y - g:i A" }}</p>
+    </div>
+
+    <!-- Delete Confirmation -->
+    <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div style="width: 60px; height: 60px; background-color: #fff5f5; border: 3px solid #feb2b2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                <span style="color: #dc3545; font-size: 24px; font-weight: bold;">!</span>
+            </div>
+            <h2 style="color: #dc3545; margin-bottom: 10px;">Delete Comment</h2>
+            <p style="color: #666;">Are you sure you want to delete this comment? This action cannot be undone.</p>
+        </div>
+        
+        <!-- Comment Preview -->
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #dc3545; margin-bottom: 30px;">
+            <div style="margin-bottom: 10px;">
+                <strong style="color: #333;">{{ comment.author.username }}</strong>
+                <span style="color: #666; font-size: 14px; margin-left: 10px;">
+                    {{ comment.created_date|date:"F d, Y - g:i A" }}
+                </span>
+            </div>
+            <div style="color: #333; line-height: 1.6; max-height: 100px; overflow-y: auto;">
+                {{ comment.content|linebreaks|truncatewords:50 }}
+            </div>
+        </div>
+        
+        <form method="post" style="display: flex; gap: 10px; justify-content: center;">
+            {% csrf_token %}
+            <a href="{% url 'post-detail' comment.post.pk %}" 
+               style="background-color: #6c757d; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; transition: background-color 0.3s; display: inline-block;"
+               onmouseover="this.style.backgroundColor='#5a6268'"
+               onmouseout="this.style.backgroundColor='#6c757d'">
+                Cancel
+            </a>
+            <button type="submit" 
+                    style="background-color: #dc3545; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.3s;"
+                    onmouseover="this.style.backgroundColor='#c82333'"
+                    onmouseout="this.style.backgroundColor='#dc3545'"
+                    onclick="return confirm('Are you absolutely sure you want to delete this comment?')">
+                Delete Comment
+            </button>
+        </form>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+            <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 4px;">
+                <small style="color: #721c24;">
+                    <strong>Warning:</strong><br>
+                    • This action is permanent and cannot be undone<br>
+                    • The comment will be completely removed from the post<br>
+                    • Any replies to this comment may lose context<br>
+                    • Consider editing instead of deleting if you just want to make changes
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="{% url 'post-detail' comment.post.pk %}" style="color: #007bff; text-decoration: none;">← Back to Post</a>
+    </div>
+</div>
+{% endblock %}

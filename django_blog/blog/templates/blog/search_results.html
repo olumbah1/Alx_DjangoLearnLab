@@ -1,0 +1,50 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Search Results - Django Blog{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <!-- Search Bar -->
+    <div style="background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <form method="get" action="{% url 'search-posts' %}" style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" name="q" placeholder="Search posts..." required 
+                   style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;"
+                   value="{{ query }}">
+            <button type="submit" 
+                    style="background-color: #007bff; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.3s;">
+                Search
+            </button>
+        </form>
+    </div>
+
+    {% if query %}
+        <div style="margin-bottom: 20px;">
+            <h2>Search Results for "{{ query }}"</h2>
+            <p style="color: #666;">{{ posts.count }} result{{ posts.count|pluralize }} found</p>
+        </div>
+
+        {% if posts %}
+            {% for post in posts %}
+                <article style="background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3><a href="{% url 'post-detail' post.pk %}" style="color: #007bff; text-decoration: none;">{{ post.title }}</a></h3>
+                    <p style="color: #666; font-size: 14px;">
+                        By {{ post.author.username }} on {{ post.date_posted|date:"F d, Y" }}
+                    </p>
+                    <p>{{ post.content|truncatewords:50 }}</p>
+                    <a href="{% url 'post-detail' post.pk %}" style="color: #007bff;">Read more...</a>
+                </article>
+            {% endfor %}
+        {% else %}
+            <div style="background: white; padding: 40px; text-align: center; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h3>No posts found</h3>
+                <p>Try different keywords or <a href="{% url 'post-list' %}" style="color: #007bff;">browse all posts</a>.</p>
+            </div>
+        {% endif %}
+    {% else %}
+        <div style="background: white; padding: 40px; text-align: center; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h2>Search Posts</h2>
+            <p>Enter keywords to search through blog posts.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

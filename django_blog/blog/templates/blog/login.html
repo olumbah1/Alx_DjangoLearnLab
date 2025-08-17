@@ -1,6 +1,56 @@
-<form method="post">
-    {% csrf_token %}
-    <input type="text" name="username" placeholder="Username">
-    <input type="password" name="password" placeholder="Password">
-    <button type="submit">Login</button>
-</form>
+{% extends 'blog/base.html' %}
+
+{% block title %}Login - Django Blog{% endblock %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    <h2 style="text-align: center; color: #333; margin-bottom: 30px;">Login</h2>
+    
+    {% if form.errors %}
+        <div style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin-bottom: 20px;">
+            {{ form.errors }}
+        </div>
+    {% endif %}
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin-bottom: 20px;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 20px;">
+            <label for="id_username" style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">Username:</label>
+            <input type="text" name="username" id="id_username" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;" value="{{ form.username.value|default:'' }}">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="id_password" style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">Password:</label>
+            <input type="password" name="password" id="id_password" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;">
+        </div>
+        
+        <button type="submit" style="width: 100%; background-color: #007bff; color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-bottom: 20px; transition: background-color 0.3s;">
+            Login
+        </button>
+        
+        <div style="text-align: center;">
+            <p>Don't have an account? <a href="{% url 'register' %}" style="color: #007bff; text-decoration: none;">Register here</a></p>
+        </div>
+    </form>
+</div>
+
+<style>
+    input[type="text"]:focus, input[type="password"]:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    }
+    button:hover {
+        background-color: #0056b3 !important;
+    }
+</style>
+{% endblock %}

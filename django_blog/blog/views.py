@@ -7,17 +7,41 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from .models import Post, Comment
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy # Import reverse_lazy to lazily resolve URLs, suitable for use in class-based views
-
+from django.db.models import Q
 # Create your Register views here.
+
+# views.py - Debug version
 def register_view(request):
+    print(f"Request method: {request.method}")
+    
     if request.method == 'POST':
+        print("POST data received:", request.POST)
+        
         form = UserRegisterForm(request.POST)
+        print(f"Form created, is_valid: {form.is_valid()}")
+        
         if form.is_valid():
-            form.save()
-            messages.success(request, "Account created successfully! Please log in.")
-            return redirect('login')
-    else: 
+            print("Form is valid, attempting to save...")
+            try:
+                user = form.save()
+                print(f"User created successfully: {user.username}, ID: {user.id}")
+                messages.success(request, f"Account created successfully for {user.username}! Please log in.")
+                return redirect('login')
+            except Exception as e:
+                print(f"Error saving user: {str(e)}")
+                messages.error(request, f"Error creating account: {str(e)}")
+        else:
+            print("Form is NOT valid")
+            print("Form errors:", form.errors)
+            print("Non-field errors:", form.non_field_errors())
+            # Add error messages to display in template
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+    else:
+        print("GET request - creating empty form")
         form = UserRegisterForm()
+    
     return render(request, 'blog/register.html', {'form': form})
 
 # login views
@@ -39,21 +63,65 @@ def logout_view(request):
     logout(request)
     return redirect('login')
         
-@login_required #Prevents non-logged-in users from accessing the profile page.
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import UserUpdateForm, ProfileUpdateForm
+from .models import Profile
+
+@login_required
 def profile_view(request):
-    if request.method =='POST': # This means the user submitted the profile edit form.
-        u_form = UserUpdateForm(request.POST, instance=request.user) # Tells the form to update the current logged-in user instead of creating a new one.
-        p_form = ProfileUpdateForm(request.POST, request.FILES) #Handles profile picture uploads.
+    # Ensure profile exists for the user
+    profile, created = Profile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        p_form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
         
         if u_form.is_valid() and p_form.is_valid():
             u_form.save()
             p_form.save()
-            messages.success(request, "Your profile has been updated!") # Stores a success message to display on the page after saving.
-            return redirect('profile') #Reloads the page to show updated info after form submission.
-    else:                               #Loads the form pre-filled with the current user’s details.
+            messages.success(request, "Your profile has been updated!")
+            return redirect('profile')
+    else:
         u_form = UserUpdateForm(instance=request.user)
-        p_form = ProfileUpdateForm(instance=request.user.profile)
-    return render(request, 'blog/profile.html', {'u_form': u_form, 'p_form':p_form})
+        p_form = ProfileUpdateForm(instance=profile)
+
+    return render(request, 'blog/profile.html', {'u_form': u_form, 'p_form': p_form})
+
+def profile_view(request):
+    profile = request.user.profile  # or however you access it
+    # pass profile in context
+    context = {
+        'profile': profile,
+        # other context variables
+    }
+    return render(request, 'blog/profile.html', context)
+
+# views.py
+@login_required
+def profile_update_view(request):
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        p_form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
+
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
+            p_form.save()
+            messages.success(request, 'Your profile was updated successfully!')
+            return redirect('profile')  # Redirect back to profile view
+
+    else:
+        u_form = UserUpdateForm(instance=request.user)
+        p_form = ProfileUpdateForm(instance=profile)
+
+    return render(request, 'blog/profile_update.html', {
+        'u_form': u_form,
+        'p_form': p_form
+    })
+
 
 # Post Views classes with Authentication
 
@@ -126,6 +194,10 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     
 #Comment Views for Post
 class CommentCreateView(LoginRequiredMixin, CreateView):
+    model = Comment  # The model that this view operates on
+    form_class = CommentForm  # The form class to use for updating the comment
+    template_name = 'blog/comment_create.html' 
+    
     def post(self, request, pk):
         post = Post.objects.get(pk=pk)
         form = CommentForm(request.POST)
@@ -136,8 +208,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
             comment.save()
         return redirect('post-detail', pk=pk) 
     
-     
-
+    
 class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):  # View for updating comments, only accessible to logged-in users who pass the test
     model = Comment  # The model that this view operates on
     form_class = CommentUpdateForm  # The form class to use for updating the comment
@@ -160,3 +231,21 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):  #
     
     def get_success_url(self):  # Define where to redirect after successful deletion
         return reverse_lazy('post-detail', kwargs={'pk': self.object.post.pk})  # Redirect to the detail view of the post related to the comment
+
+
+def search_posts(request):
+    query = request.GET.get('q')   # Get the search query from URL
+    results = []
+
+    if query:
+        results = Post.objects.filter(
+            Q(title__icontains=query) |
+            Q(content__icontains=query) |
+            Q(tags__name__icontains=query) # Filter by title, content or tag
+        ).distinct()                       # Avoid duplicate posts
+
+    return render(request, 'blog/search_results.html', {'query': query, 'results': results})
+
+def posts_by_tag(request, tag_name):    # Filter posts by tag name
+    posts = Post.objects.filter(tags__name=tag_name)
+    return render(request, 'blog/posts_by_tag.html', {'posts': posts, 'tag': tag_name})

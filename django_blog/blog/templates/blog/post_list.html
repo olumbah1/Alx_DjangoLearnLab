@@ -1,45 +1,89 @@
 {% extends 'blog/base.html' %}
+{% load static %}
 {% csrf_token %}
-{% block title %}Django Blog - Home{% endblock %}
+{% block title %}Blog Posts{% endblock %}
 
 {% block content %}
-<div style="max-width: 800px; margin: 0 auto;">
-    <h1>Latest Blog Posts</h1>
-    
-    {% if posts %}
-        {% for post in posts %}
-            <article style="background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <h2><a href="{% url 'post-detail' post.pk %}" style="color: #007bff; text-decoration: none;">{{ post.title }}</a></h2>
-                <p style="color: #666; font-size: 14px;">
-                    By {{ post.author.username }} on {{ post.date_posted|date:"F d, Y" }}
-                </p>
-                <p>{{ post.content|truncatewords:50 }}</p>
-                <a href="{% url 'post-detail' post.pk %}" style="color: #007bff;">Read more...</a>
-            </article>
-        {% endfor %}
-        
-        <!-- Pagination -->
-        {% if is_paginated %}
-            <nav aria-label="Page navigation">
-                <ul style="display: flex; justify-content: center; list-style: none; padding: 0;">
-                    {% if page_obj.has_previous %}
-                        <li><a href="?page=1" style="padding: 8px 12px; margin: 0 2px; border: 1px solid #ddd; text-decoration: none;">First</a></li>
-                        <li><a href="?page={{ page_obj.previous_page_number }}" style="padding: 8px 12px; margin: 0 2px; border: 1px solid #ddd; text-decoration: none;">Previous</a></li>
-                    {% endif %}
-                    
-                    <li style="padding: 8px 12px; margin: 0 2px; border: 1px solid #007bff; background-color: #007bff; color: white;">
-                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                    </li>
-                    
-                    {% if page_obj.has_next %}
-                        <li><a href="?page={{ page_obj.next_page_number }}" style="padding: 8px 12px; margin: 0 2px; border: 1px solid #ddd; text-decoration: none;">Next</a></li>
-                        <li><a href="?page={{ page_obj.paginator.num_pages }}" style="padding: 8px 12px; margin: 0 2px; border: 1px solid #ddd; text-decoration: none;">Last</a></li>
-                    {% endif %}
-                </ul>
-            </nav>
-        {% endif %}
-    {% else %}
-        <p>No posts available yet. <a href="{% url 'post-create' %}">Create the first post!</a></p>
-    {% endif %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Blog Posts</h1>
+            
+            <!-- Search Form -->
+            <div class="mb-4">
+                <form method="get" action="{% url 'search-posts' %}" class="d-flex">
+                    <input type="text" name="q" class="form-control me-2" placeholder="Search posts..." required>
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </form>
+            </div>
+            
+            <!-- Posts List -->
+            {% if posts %}
+                <div class="row">
+                    {% for post in posts %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                {% if post.image %}
+                                    <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}" style="height: 200px; object-fit: cover;">
+                                {% endif %}
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title">{{ post.title }}</h5>
+                                    <p class="card-text">{{ post.content|truncatewords:30 }}</p>
+                                    <div class="mt-auto">
+                                        <small class="text-muted">
+                                            By {{ post.author.username }} on {{ post.created_at|date:"M d, Y" }}
+                                        </small>
+                                        <div class="mt-2">
+                                            <a href="{% url 'post-detail' post.pk %}" class="btn btn-primary btn-sm">Read More</a>
+                                            {% if user == post.author %}
+                                                <a href="{% url 'post-update' post.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+                                                <a href="{% url 'post-delete' post.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if is_paginated %}
+                    <nav aria-label="Posts pagination">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1">First</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                                </li>
+                            {% endif %}
+                            
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                </span>
+                            </li>
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-info">
+                    <h4>No posts found</h4>
+                    <p>There are no blog posts yet. <a href="{% url 'post-create' %}">Create the first one!</a></p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
-{% endblock %}}
+{% endblock %}
