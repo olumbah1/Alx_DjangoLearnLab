@@ -1,4 +1,5 @@
 {% extends 'blog/base.html' %}
+
 {% block content %}
 <h1>{{ object.title }}</h1>
 <p>{{ object.content }}</p>
@@ -10,6 +11,13 @@
 {% endif %}
 
 <a href="{% url 'post-list' %}">⬅️ Back to List</a>
+
+<!-- ✅ Move this above comments (belongs to post, not comment) -->
+<p><strong>Tags:</strong>
+    {% for tag in object.tags.all %}
+        <a href="{% url 'posts_by_tag' tag %}">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+</p>
 
 <hr>
 
@@ -46,3 +54,4 @@
 {% endif %}
 
 {% endblock %}
+

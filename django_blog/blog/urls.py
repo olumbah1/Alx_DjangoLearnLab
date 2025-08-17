@@ -8,7 +8,7 @@ from .views import (PostListView,
                     CommentCreateView,
                     CommentUpdateView,
                     CommentDeleteView,
-    
+                    
                     )
 
 urlpatterns = [
@@ -21,6 +21,7 @@ urlpatterns = [
     
     path('search/', views.search_posts, name='search-posts'),
     path('tags/<str:tag_name>/', views.posts_by_tag, name='posts-by-tag'),
+    path('tags/<slug:tag_slug>/', views.PostByTagListView.as_view(), name='posts-by-tag'),
 
     # Post CRUD Views URL
     path('posts', PostListView.as_view(), name='post-list'),
