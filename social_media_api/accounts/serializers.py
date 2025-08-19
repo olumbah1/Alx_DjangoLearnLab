@@ -77,6 +77,7 @@ class UserLoginSerializer(serializers.Serializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     followers_count = serializers.SerializerMethodField()
     following_count = serializers.SerializerMethodField()
+    is_following = serializers.SerializerMethodField()
     
     class Meta:
         model = CustomUser
@@ -99,3 +100,52 @@ class UserProfileSerializer(serializers.ModelSerializer):
     
     def get_following_count(self, obj):
         return obj.following.count()
+    
+    def get_is_following(self, obj): # Check if the current user is following this profile user
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return request.user.is_following(obj)
+        return False
+
+
+class FollowSerializer(serializers.Serializer): # Serializer for follow/unfollow actions
+    user_id = serializers.IntegerField()
+    
+    def validate_user_id(self, value):
+        try:
+            user = CustomUser.objects.get(id=value)
+            return user
+        except CustomUser.DoesNotExist:
+            raise serializers.ValidationError("User does not exist")
+
+
+class UserListSerializer(serializers.ModelSerializer): # Serializer for listing users (followers/following lists)
+    followers_count = serializers.SerializerMethodField()
+    following_count = serializers.SerializerMethodField()
+    is_following = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = CustomUser
+        fields = [
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'bio',
+            'profile_picture',
+            'followers_count',
+            'following_count',
+            'is_following'
+        ]
+    
+    def get_followers_count(self, obj):
+        return obj.followers.count()
+    
+    def get_following_count(self, obj):
+        return obj.following.count()
+    
+    def get_is_following(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return request.user.is_following(obj)
+        return False
