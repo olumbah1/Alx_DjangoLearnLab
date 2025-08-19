@@ -1,12 +1,12 @@
 from rest_framework import viewsets, filters, status
 from .serializers import PostSerializer, CommentSerializer
 from .models import Post, Comment
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework import permissions
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Q
-from rest_framework.viewsets import GenericViewSet
+
 
 
 # Create your views here.
@@ -14,7 +14,7 @@ from rest_framework.viewsets import GenericViewSet
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('-created_at')
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter
@@ -31,8 +31,7 @@ class PostViewSet(viewsets.ModelViewSet):
         user = request.user
         following_users = user.following.all()
 
-        queryset = Post.objects.filter(
-            Q(author__in=following_users) | Q(author=user)
+        queryset = Post.objects.filter(Q(author__in=following_users) | Q(author=user)
         ).distinct().order_by('-created_at')
 
         serializer = self.get_serializer(queryset, many=True, context={'request': request})
@@ -53,12 +52,8 @@ class PostViewSet(viewsets.ModelViewSet):
         user = request.user
         following_users = user.following.all()
 
-        queryset = Post.objects.filter(
-            author__in=following_users
-        ).order_by('-created_at')
-
+        queryset = Post.objects.filter(author__in=following_users).order_by('-created_at')
         serializer = self.get_serializer(queryset, many=True, context={'request': request})
-
         return Response({
             'message': 'Posts from users you follow',
             'posts_count': queryset.count(),
@@ -104,7 +99,7 @@ class PostViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all().order_by('-created_at')
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
         
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
