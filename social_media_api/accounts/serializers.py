@@ -8,22 +8,33 @@ from django.contrib.auth import get_user_model
 
 CustomUser = get_user_model()
 
+from rest_framework import serializers
+from .models import CustomUser
+from django.core.exceptions import ValidationError
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import get_user_model
+
+CustomUser = get_user_model()
+
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)
     password_confirm = serializers.CharField(write_only=True)
     
     class Meta:
         model = CustomUser
-        fields = ['username', 'first_name', 'last_name','email', 'password_confirm','password']
+        fields = ['username', 'first_name', 'last_name', 'email', 'bio', 'password', 'password_confirm']
         extra_kwargs = {
-            'email': {'required':True},
-            'username': {'required':True}     # Make email and username required
+            'email': {'required': True},
+            'username': {'required': True}
         }
+    
     def validate_password(self, value):
         try:
             validate_password(value)
         except ValidationError as e:
-          raise serializers.ValidationError(e.messages)
+            raise serializers.ValidationError(e.messages)
         return value  
      
     def validate_email(self, value):
@@ -42,7 +53,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         Token.objects.create(user=user)
         return user
         
-    
+
 class UserLoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
@@ -57,14 +68,34 @@ class UserLoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError("Invalid username and password")
             if not user.is_active:
                 raise serializers.ValidationError("User account is disabled")
-            attrs['user']=user
+            attrs['user'] = user
             return attrs
         else:
             raise serializers.ValidationError("Must include username and password")
-    
-    
+
+
 class UserProfileSerializer(serializers.ModelSerializer):
+    followers_count = serializers.SerializerMethodField()
+    following_count = serializers.SerializerMethodField()
+    
     class Meta:
         model = CustomUser
-        fields = ['id', 'profile_picture', 'username', 'first_name', 'last_name', 'email', 'bio', 'password_confirm', 'password', 'date_joined']
-        read_only_fields = ['id', 'username', 'date_joined']
+        fields = [
+            'id', 
+            'username', 
+            'first_name', 
+            'last_name', 
+            'email', 
+            'bio', 
+            'profile_picture',
+            'followers_count',
+            'following_count',
+            'date_joined'
+        ]
+        read_only_fields = ['id', 'username', 'date_joined', 'followers_count', 'following_count']
+    
+    def get_followers_count(self, obj):
+        return obj.followers.count()
+    
+    def get_following_count(self, obj):
+        return obj.following.count()
