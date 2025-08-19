@@ -2,7 +2,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework import generics, status
 from django.shortcuts import get_object_or_404
 from .models import CustomUser
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserProfileSerializer, UserListSerializer
@@ -11,7 +11,7 @@ from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserPr
 class UserRegistrationView(generics.CreateAPIView):
       queryset = CustomUser.objects.all()
       serializer_class = UserRegistrationSerializer
-      permission_classes = [AllowAny]
+      permission_classes = [permissions.AllowAny]
       
       def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -24,7 +24,7 @@ class UserRegistrationView(generics.CreateAPIView):
         }, status=status.HTTP_201_CREATED)
       
 class UserLoginView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.AllowAny]
     serializer_class = UserLoginSerializer
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
@@ -39,7 +39,7 @@ class UserLoginView(APIView):
     
 class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
         return self.request.user
@@ -47,12 +47,12 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 class UserDetailView(generics.RetrieveAPIView): #  """View to get any user's profile by username"""
     queryset = CustomUser.objects.all()
     serializer_class = UserProfileSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'username'
     
 class FollowUserView(generics.GenericAPIView):
     """Follow a user"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     queryset = CustomUser.objects.all()
     lookup_url_kwarg = 'user_id'
 
@@ -83,7 +83,7 @@ class FollowUserView(generics.GenericAPIView):
 
 
 class UnfollowUserView(generics.GenericAPIView):  # """Unfollow a user"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     queryset = CustomUser.objects.all()
     lookup_url_kwarg = 'user_id'
 
@@ -113,7 +113,7 @@ class UnfollowUserView(generics.GenericAPIView):  # """Unfollow a user"""
 
 class UserFollowersView(generics.ListAPIView): # """Get list of user's followers"""
     serializer_class = UserListSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = get_object_or_404(CustomUser, id=self.kwargs['user_id'])
@@ -133,7 +133,7 @@ class UserFollowersView(generics.ListAPIView): # """Get list of user's followers
 
 class UserFollowingView(generics.ListAPIView): # """Get list of users that this user is following"""
     serializer_class = UserListSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = get_object_or_404(CustomUser, id=self.kwargs['user_id'])
