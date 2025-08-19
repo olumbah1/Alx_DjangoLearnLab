@@ -3,6 +3,7 @@ from .models import CustomUser
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -36,6 +37,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('password_confirm')
         user = CustomUser.objects.create_user(**validated_data)
+        Token.objects.create(user=user)
         return user
         
     
