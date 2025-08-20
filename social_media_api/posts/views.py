@@ -7,6 +7,7 @@ from django.db.models import Q
 from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer
 from notifications.models import Notification
+from rest_framework import generics
 
 class PostListCreateAPIView(generics.ListCreateAPIView):  # List and create posts
     queryset = Post.objects.all().order_by('-created_at')  # Get all posts ordered by newest
@@ -27,12 +28,12 @@ class PostLikeView(APIView):  # View to like a post
     permission_classes = [permissions.IsAuthenticated]  # Only authenticated users allowed
 
     def post(self, request, pk):  # Handle POST request to like a post
-        post = get_object_or_404(Post, pk=pk)  # Get the post or return 404
+        post = generics.get_object_or_404(Post, pk=pk)  # Get the post or return 404
         user = request.user  # Get current user
 
         if Like.objects.filter(post=post, user=user).exists():
             return Response({'message': 'Already liked'}, status=status.HTTP_400_BAD_REQUEST)  # Prevent duplicate likes
-        Like.objects.create(post=post, user=user)  # Create the like
+        Like.objects.get_or_create(user=request.user, post=post)  # Create the like
 
         if post.author != user:
             Notification.objects.create(recipient=post.author,
@@ -45,7 +46,7 @@ class PostUnlikeAPIView(APIView):  # View to unlike a post
     permission_classes = [permissions.IsAuthenticated]  # Only authenticated users allowed
 
     def post(self, request, pk):  # Handle POST request to unlike a post
-        post = get_object_or_404(Post, pk=pk)  # Get the post or return 404
+        post = generics.get_object_or_404(Post, pk=pk)  # This is valid because DRF generics re-exposes it
         user = request.user  # Get current user
 
         like = Like.objects.filter(post=post, user=user).first()  # Find the like
