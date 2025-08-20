@@ -40,8 +40,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'accounts',
     'posts',
+    'notifications',
     'rest_framework.authtoken',
     'django_filters',
+    
 ]
 
 MIDDLEWARE = [
@@ -131,6 +133,13 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        # ... other auth classes
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
   
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -141,5 +150,10 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
 }
 
+
+import os
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
