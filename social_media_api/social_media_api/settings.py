@@ -19,11 +19,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-cwgt$h55(^%vy+$*-mqaf4&c5^j^law#l(&p-9qb+=(d*ku+v+'
+from decouple import config
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
+IS_PRODUCTION = config('DJANGO_PRODUCTION', default=False, cast=bool)
+
 
 ALLOWED_HOSTS = []
 
@@ -156,4 +157,28 @@ import os
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Enable the X-XSS-Protection header
+SECURE_BROWSER_XSS_FILTER = True
 
+# Prevent the browser from attempting to guess the content type
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Prevent your site from being rendered in an iframe (clickjacking protection)
+X_FRAME_OPTIONS = 'DENY'  # Options: 'DENY', 'SAMEORIGIN', 'ALLOW-FROM uri'
+
+# Redirect all non-HTTPS requests to HTTPS
+SECURE_SSL_REDIRECT = False  # Make sure your site is served via HTTPS
+
+if IS_PRODUCTION:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    ALLOWED_HOSTS = ['yourdomain.com']
+else:
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    ALLOWED_HOSTS = []
